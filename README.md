@@ -2,7 +2,9 @@
 
 *-Proverbs 28:13*
 # The Godspeed Project
-2 Python port scanners I created to help speed up certain CTF tasks, but mostly just for fun. Like many other homemade port scanners, the goal was to quickly identify open ports, which could then be taken to nmap for further enumeration.</br>
+2 Python port scanners I created to help speed up certain CTF tasks, but mostly just for fun.<br/>
+
+Like many other homemade port scanners, the goal was to quickly identify all open ports, which could then be taken to nmap for further enumeration. The puposes being efficient time management(speed), and identifying possible services running on any non-standard ports nmap doesn't check by default.</br>
 The functional speed is mostly dependant on network connection, and various target/scanner/host configurations. More on that below.<br/>
 **Neither of them were designed to be subtle (see quote), and are obviously not meant for "professional" use.<br/>**
 
@@ -55,7 +57,7 @@ nmap -p 9090,10119,12654,13000 -sV -Pn -sC -T4 192.168.1.50
 
 ## originalSYN.py
 A (single-threaded) TCP SYN scanner, capable of targeting one or more specific ports. It generates its own TCP headers and delivers them via raw sockets.<br/> 
-The Godspeed Project itself was originally meant to just be a SYN scanner, but that was annoying to impliment with threading, and processing a few extra TCP Handshake packets ultimately has little/no effect on the scan speed. OriginalSYN is mostly a proof of concept, but I found it useful for quickly testing individual ports/ranges to observe their behavior in wireshark, or confirming their open/closed/unresponsive status.<br/>
+The Godspeed Project itself was originally meant to just be a SYN scanner, but that was annoying to impliment with threading, and processing a few extra TCP Handshake packets ultimately has little/no effect on the scan speed unless a VERY significant amount of ports are open. OriginalSYN is mostly a proof of concept, but I found it useful for quickly testing individual ports/ranges to observe their behavior in wireshark, or confirming their open/closed/unresponsive status.<br/>
 
 Scan time is generally ~7000 ports per second, under normal conditions, with full port scans taking ~10 seconds.
 ### Usage
@@ -94,11 +96,11 @@ Completed in 0.002007741015404463s
 - Requires sudo/root privileges, due to raw socket usage
 - Currently only works on linux, because windows does not allow you to use raw sockets for TCP. 
 ## Disclaimer
-(In case any one actually finds their way here)<br/>
+*(In case any one actually finds their way here)*<br/>
 While port scanning hosts/servers without permission isn't technically a crime in the US, the owners of said hosts/servers absolutely do not like it. Ramifications of an unauthorized scan could include IP banishment, lawsuits, and/or violating your ISP's Acceptable Use Policy and losing your internet. If you're still hell-bent on doing whatever you want to do, don't use my scanners lol.
 ## To do
 - Add UDP functionality (ogSYN, probably)
-- Make threading less hideous/more efficient (godspeed)
+- Make threading code less hideous/more efficient (godspeed)
 - Make better system for parsing ports argument (ogSYN)
   - ex: originalSYN.py 1.1.1.1 8080 9000-14000 18036
 - Add more religious iconography
