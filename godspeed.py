@@ -18,7 +18,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 lock = threading.Lock()
 
-class ArgumentParser(argparse.ArgumentParser): # just to tailor the error messages a bit more to my liking, completely aesthetic
+class ArgumentParser(argparse.ArgumentParser): # just to tailor the argument error messages a bit more to my liking, completely aesthetic
     def error(self, message):
         print("Error: {}".format(message)) # error
         sys.exit("Try '{} --help' for more information".format(self.prog))
@@ -85,11 +85,11 @@ if __name__ == '__main__':
 	socket.setdefaulttimeout(args.timeout)
 	dst_ip = args.target_ip
 	threads = args.threads
-	quiet = args.quiet # default of quiet is false
+	quiet = args.quiet # "quiet mode", default is false
 
 	open_ports = []
 
-	t = time.perf_counter()
+	start = time.perf_counter()
 	# Threading. May revisit, could be better
 	with ThreadPoolExecutor(max_workers=threads) as ex: 
 		connections = [ex.submit(connect, dst_ip, port, quiet) for port in range(1,65536)] # compile list of futures
@@ -97,7 +97,7 @@ if __name__ == '__main__':
 			pass
 
 	if not args.quiet:
-		print("\nScan completed at {:.5f}s".format(time.perf_counter() - t))
+		print("\nScan completed at {:.5f}s".format(time.perf_counter() - start))
 		print("{} open TCP port(s) found.\n".format(len(open_ports)))
 
 	if open_ports != []:
