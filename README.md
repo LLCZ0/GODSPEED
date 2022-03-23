@@ -11,7 +11,7 @@ originalSYN.py - Single-threaded TCP SYN scanner<br/>
 
 As of godspeed v1.1.0, the fastest average is 7.41 seconds for all 65,535 ports. (n=10)<br/>
 ## godspeed.py
-A multi-threaded TCP Connect scanner, targeting all 65,535 ports. Along with open ports, it outputs an nmap-friendly command for a simple transition between the two.<br/>
+A multi-threaded TCP Connect scanner, targeting all 65,535 ports. Along with open ports, it outputs an nmap-friendly command for an easy transition between the two.<br/>
 
 Scan time is typically less than 8 seconds. If it's more than 15, consider increasing the thread count.
 ### Usage
