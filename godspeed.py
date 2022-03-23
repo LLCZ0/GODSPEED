@@ -1,4 +1,4 @@
-#!/usr/bin/python3.9
+#!/usr/bin/python3
 # godspeed.py by LLCZ0
 # v1.1.0
 #
