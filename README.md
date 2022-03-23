@@ -48,7 +48,7 @@ suggested nmap command:
 nmap -p 9090,10119,12654,13000 -sV -Pn -sC -T4 192.168.1.50
 ```
 ### Notes and Issues
-- Some machines won't respond to requests to closed ports, which leads to godspeed.py relying on the connection timeout to determine if it's closed. This absolutely tanks the scan time.
+- Some machines won't respond to requests to closed ports, which leads to godspeed relying on the connection timeout to determine if it's closed. This absolutely tanks the scan time.
   - This can be mitigated by increasing with thread count with ***-w*** or ***--threads*** and/or decreasing the timeout with ***-t*** or ***--timeout***.
 - A timeout of .3 can occasionally lead to missing RST packets and identifying a port as "unresponsive"
   - This is pretty rare (~5/65535) but it could potentially lead to false negatives.
