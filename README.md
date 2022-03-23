@@ -6,12 +6,12 @@
 
 Like many other homemade port scanners, the goal was to quickly identify all open ports, which could then be taken to nmap for further enumeration. The puposes being efficient time management(speed), and identifying possible services running on any non-standard ports nmap doesn't check by default.</br>
 The functional speed is mostly dependant on network connection, and various target/scanner/host configurations. More on that below.<br/>
-**Neither of them were designed to be subtle (see quote), and are obviously not meant for "professional" use.<br/>**
+Neither of them were designed to be subtle (see quote), and are obviously not meant for "professional" use.<br/>
 
 godspeed.py - Multi-threaded TCP Connect scanner<br/>
 originalSYN.py - Single-threaded TCP SYN scanner<br/>
 
-As of godspeed v1.1.0, the fastest average is 7.41 seconds for all 65,535 ports. (n=10)<br/>
+***As of godspeed v1.1.0, the fastest average is 7.41 seconds for all 65,535 ports. (n=10)<br/>***
 
 *Developed using python3.9, but it should work with any recent python3. I purposely used only built-ins and avoided newer modules/functions*
 ## godspeed.py
