@@ -1,2 +1,3 @@
-# GODSPEED-Port-Scanner
-Python port scanners to facilitate quicker network enumeration. Built for speed
+>Whoever conceals their syns does not prosper..<br/>
+
+*-Proverbs 28:13*
