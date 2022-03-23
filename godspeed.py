@@ -18,7 +18,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 lock = threading.Lock()
 
-class ArgumentParser(argparse.ArgumentParser): # just to tailor the argument error messages a bit more to my liking, completely aesthetic
+# just to tailor the argument error messages a bit more to my liking, completely aesthetic
+class ArgumentParser(argparse.ArgumentParser): 
     def error(self, message):
         print("Error: {}".format(message)) # error
         sys.exit("Try '{} --help' for more information".format(self.prog))
