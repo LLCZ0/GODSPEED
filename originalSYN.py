@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 #
 # originalSYN.py by LLCZ00
-# v1.2.0
 #
 # For all have sinned,
 # 	and fall short of the glory of God.
 # - Romans 3:23
 # 
+_v='v1.2.1'
 
 import socket
 import struct
@@ -68,7 +68,7 @@ def argument_handler():
 		prog='originalSYN.py',
 		usage="%(prog)s [options] target_ip ports", 
 		formatter_class=argparse.RawDescriptionHelpFormatter,
-		description="OriginalSYN Scanner v1.2:\nPerforms a TCP SYN scan of desired ports.\nRequires sudo/root privileges to use raw sockets",
+		description="OriginalSYN Scanner {}:\nPerforms a TCP SYN scan of desired ports.\nRequires sudo/root privileges to use raw sockets".format(_v),
 		epilog="Examples:\n%(prog)s 192.168.1.1 8080\n%(prog)s -v -t 15 10.10.10.23 9090 9091 9092-10000\n%(prog)s --timeout=.1 192.168.1.50 1-65535"
 	)
 
