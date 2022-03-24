@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 #
 # godspeed.py by LLCZ00
-# v1.1.1
 #
 # Look! He advances like the clouds,
 #    his chariots come like a whirlwind,
@@ -9,6 +8,7 @@
 #    Woe to us! We are ruined!
 # - Jeremiah 4:13
 #
+_v='v1.1.2'
 
 import socket
 import sys
@@ -30,7 +30,7 @@ def argument_handler():
 		prog='godspeed.py',
 		usage="%(prog)s [options] target_ip", 
 		formatter_class=argparse.RawDescriptionHelpFormatter,
-		description="GODSPEED Scanner v1.1.1:\nPerforms a relatively quick TCP Connect scan of all 65,535 ports.\nOutputs nmap-friendly command for further enumeration.",
+		description="GODSPEED Scanner {}:\nPerforms a relatively quick TCP Connect scan of all 65,535 ports.\nOutputs nmap-friendly command for further enumeration.".format(_v),
 		epilog="Examples:\n%(prog)s 192.168.1.1\n%(prog)s --threads=400 -q 10.10.10.23\n%(prog)s -w 150 --timeout 1.2 192.168.1.50"
 	)
 	parser.add_argument(
