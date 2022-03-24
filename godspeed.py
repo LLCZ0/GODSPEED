@@ -1,6 +1,7 @@
 #!/usr/bin/python3
-# godspeed.py by LLCZ0
-# v1.1.0
+#
+# godspeed.py by LLCZ00
+# v1.1.1
 #
 # Look! He advances like the clouds,
 # 	 his chariots come like a whirlwind,
@@ -18,17 +19,16 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 lock = threading.Lock()
 
-# just to tailor the argument error messages a bit more to my liking, completely aesthetic
-class ArgumentParser(argparse.ArgumentParser): 
+class LLCZ00Parser(argparse.ArgumentParser): # better error handler
     def error(self, message):
-        print("Error: {}".format(message)) # error
+        print("Error. {}".format(message))
         sys.exit("Try '{} --help' for more information".format(self.prog))
 
 def argument_handler():
-	parser = ArgumentParser(prog='godspeed.py',
+	parser = LLCZ00Parser(prog='godspeed.py',
 		usage="%(prog)s [options] target_ip", 
 		formatter_class=argparse.RawDescriptionHelpFormatter,
-		description="GODSPEED Scanner v1.1.0:\nPerforms a relatively quick TCP Connect scan of all 65,535 ports.\nOutputs nmap-friendly command for further enumeration.",
+		description="GODSPEED Scanner v1.1.1:\nPerforms a relatively quick TCP Connect scan of all 65,535 ports.\nOutputs nmap-friendly command for further enumeration.",
 		epilog="Examples:\n%(prog)s 192.168.1.1\n%(prog)s --threads=400 -q 10.10.10.23\n%(prog)s -w 150 --timeout 1.2 192.168.1.50"
 		)
 	parser.add_argument('-q', '--quiet',
@@ -53,17 +53,16 @@ def argument_handler():
 		help="IP address to scan"
 		)	
 
+
 	cmd = parser.parse_args()
 
 	# ip validity check
 	try:
 		packed = socket.inet_aton(cmd.target_ip) 
 		if cmd.target_ip != socket.inet_ntoa(packed):
-			sys.exit("Invalid ip: {}\nTry 'godspeed.py --help' for more information".format(cmd.target_ip))
+			parser.error("invalid ip: {}".format(cmd.target_ip))
 	except OSError:
-		sys.exit("Invalid ip: {}\nTry 'godspeed.py --help' for more information".format(cmd.target_ip))
-	# packs address into bytes, then unpacks it and compares to the original string
-	# without this, "192.168.1" will get padded with zeros and make it through, ruining everything
+		parser.error("invalid ip: {}".format(cmd.target_ip))
 
 	return cmd
 
@@ -86,11 +85,11 @@ if __name__ == '__main__':
 	socket.setdefaulttimeout(args.timeout)
 	dst_ip = args.target_ip
 	threads = args.threads
-	quiet = args.quiet # "quiet mode", default is false
+	quiet = args.quiet # "quiet mode" flag. default is false
 
 	open_ports = []
 
-	start = time.perf_counter()
+	t = time.perf_counter()
 	# Threading. May revisit, could be better
 	with ThreadPoolExecutor(max_workers=threads) as ex: 
 		connections = [ex.submit(connect, dst_ip, port, quiet) for port in range(1,65536)] # compile list of futures
@@ -98,7 +97,7 @@ if __name__ == '__main__':
 			pass
 
 	if not args.quiet:
-		print("\nScan completed at {:.5f}s".format(time.perf_counter() - start))
+		print("\nScan completed at {:.5f}s".format(time.perf_counter() - t))
 		print("{} open TCP port(s) found.\n".format(len(open_ports)))
 
 	if open_ports != []:
@@ -106,3 +105,4 @@ if __name__ == '__main__':
 		print("nmap -p {} -sV -Pn -sC -T4 {}".format(','.join(open_ports), dst_ip))
 	elif args.quiet:
 		print("Quiet Mode: No open ports found.")
+		
