@@ -1,6 +1,7 @@
 #!/usr/bin/python3
-# originalSYN.py by LLCZ0
-# v1.1.0
+#
+# originalSYN.py by LLCZ00
+# v1.2.0
 #
 # For all have sinned,
 # 	and fall short of the glory of God.
@@ -15,18 +16,60 @@ from time import perf_counter as timer
 from random import randint
 from array import array
 
-class ArgumentParser(argparse.ArgumentParser): # just to tailor the error messages a bit more to my liking, completely aesthetic
+class LLCZ00Parser(argparse.ArgumentParser): # better error handler
     def error(self, message):
-        print("Error: {}".format(message)) # error
+        print("Error. {}".format(message))
         sys.exit("Try '{} --help' for more information".format(self.prog))
 
+class Validator(argparse.Action): # custom action to sort/validate target ip and ports
+	def __call__(self, parser, namespace, values, option_string=None):
+
+		if type(values) is str: # IP
+			setattr(namespace, self.dest, self.ip_validate(values, parser))
+		elif type(values) is list: # ports
+			setattr(namespace, self.dest, self.parse_ports(values, parser))
+
+	def ip_validate(self, ip, parser):
+		try:
+			packed = socket.inet_aton(ip)
+			if ip != socket.inet_ntoa(packed):
+				parser.error("invalid ip: {}".format(ip))
+		except (OSError, socket.gaierror):
+			parser.error("invalid ip: {}".format(ip))
+		return ip
+
+	def parse_ports(self, port_list, parser):
+		ports_tmp = []
+		for port_item in port_list:
+			try:
+				if '-' in port_item: # handle ranges			
+					port_range = list(map(int, port_item.split('-')))
+
+					if (1 <= port_range[0] < port_range[1] <= 65535):
+						ports_tmp += [x for x in range(port_range[0], port_range[1]+1)]
+					else:
+						parser.error("ports out of range(1-65535), or out of order: {}".format(port_item))
+
+				else: # handle singles
+					if (1 <= int(port_item) <= 65535): 
+						ports_tmp += [int(port_item)]
+					else:
+						parser.error("port number out of range(1-65535): {}".format(port_item))
+
+			except ValueError:
+				parser.error("invalid port number: {}".format(port_item))
+		
+		return list(set(ports_tmp)) # remove duplicates
+
+
 def argument_handler():
-	parser = ArgumentParser(prog='originalSYN.py',
+	parser = LLCZ00Parser(prog='originalSYN.py',
 		usage="%(prog)s [options] target_ip ports", 
 		formatter_class=argparse.RawDescriptionHelpFormatter,
-		description="OriginalSYN Scanner v1.0.1:\nPerforms a SYN scan of desired ports.\nRequires sudo/root privileges, as it uses raw sockets to perform a true syn scan",
-		epilog="Examples:\n%(prog)s 192.168.1.1 8080\n%(prog)s -v -t 15 10.10.10.23 9090 9091 9092\n%(prog)s --timeout=.1 192.168.1.50 1-65535"
+		description="OriginalSYN Scanner v1.2:\nPerforms a TCP SYN scan of desired ports.\nRequires sudo/root privileges to use raw sockets",
+		epilog="Examples:\n%(prog)s 192.168.1.1 8080\n%(prog)s -v -t 15 10.10.10.23 9090 9091 9092-10000\n%(prog)s --timeout=.1 192.168.1.50 1-65535"
 		)
+
 	parser.add_argument('-v', '--verbose',
 		help="Output closed/irregular responses, and non-responsive ports",
 		action='store_true',
@@ -40,66 +83,29 @@ def argument_handler():
 		metavar='TIMEOUT'	
 		)
 	parser.add_argument('target_ip',
-		help="IP address to scan"
+		help="IP address to scan",
+		action=Validator
 		)	
 	parser.add_argument('ports',
 		help="Port, ports, or port range to scan",
 		nargs='+',
+		action=Validator
 		)
 
-	cmd = parser.parse_args()
+	return parser.parse_args()
 
-	# raise error if any port outside 1-65535 is submitted
-	def out_of_bounds(portlist, range_flag=0):
-		for port in portlist:
-			if not (1 <= port <=65535):
-				sys.exit("Supplied port out of range: {}\nTry 'originalSYN.py --help' for more information".format(port))
-		if range_flag:
-			if portlist[0] > portlist[1]:
-				sys.exit("Invalid port range: {}-{}\nTry 'originalSYN.py --help' for more information".format(portlist[0], portlist[1]))
-
-	# Determine port range, & convert to integers
-	try:
-		if len(cmd.ports) == 1:
-			if '-' in cmd.ports[0]: # determine/set port range (spread this part out to be a litle more readable)
-				ports_tmp = cmd.ports[0].split('-')
-				int_ports = [int(x) for x in ports_tmp]
-
-				out_of_bounds(int_ports, 1) # check range before breaking it out
-
-				cmd.ports = [port for port in range(int_ports[0], int_ports[1]+1)]
-			else:
-				cmd.ports = [int(cmd.ports[0])]
-				out_of_bounds(cmd.ports)
-		else:
-			cmd.ports = [int(x) for x in cmd.ports]
-			out_of_bounds(cmd.ports)
-	except ValueError:
-		sys.exit("One or more supplied ports is invalid: {}\nTry 'originalSYN.py --help' for more information".format(' '.join(cmd.ports)))
-
-	# ayo ip validity check
-	try:
-		packed = socket.inet_aton(cmd.target_ip)
-		if cmd.target_ip != socket.inet_ntoa(packed):
-			sys.exit("Invalid ip: {}\nTry 'originalSYN.py --help' for more information".format(cmd.target_ip))
-	except OSError:
-		sys.exit("Invalid ip: {}\nTry 'originalSYN.py --help' for more information".format(cmd.target_ip))
-	# packs address into bytes, then unpacks it and compares to the original string
-	# "192.168.1" will get padded with zeros and make it through, otherwise
-  
-	return cmd
 
 def get_hostIP(): 
 	with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as x:
-	  x.settimeout(0)
-	  x.connect(("200.255.255.255", 1)) 
-	  ip = x.getsockname()
+		x.settimeout(0)
+		x.connect(("200.255.255.255", 1)) 
+		ip = x.getsockname()
 	return ip[0]
-	# gets host ip (needed for packet creation) by connecting to unreachable address, can be anyting you desire
+	# gets host id by connecting to unreachable address, can be anyting
 	# If it continuously fails for some reason, hardcode your ip in
 
-def tcp(src_ip, src_port, dst_ip, dst_port):
-	tcp_seg = struct.pack('!HHIIBBHHH', # tcp header
+def tcp(src_ip, src_port, dst_ip, dst_port): # generate tcp header
+	tcp_seg = struct.pack('!HHIIBBHHH', 
 		src_port, 
 		dst_port, 
 		0,      # sequence
@@ -111,7 +117,7 @@ def tcp(src_ip, src_port, dst_ip, dst_port):
 		0       # urgent 
 		)
 
-	ipheader = struct.pack('!4s4sHH', # ip pseudo header (needed for checksum)
+	ipheader = struct.pack('!4s4sHH',
 		socket.inet_aton(src_ip), 
 		socket.inet_aton(dst_ip), 
 		socket.IPPROTO_TCP, 
@@ -122,7 +128,7 @@ def tcp(src_ip, src_port, dst_ip, dst_port):
 	sum16 = (packetsum >> 16) + (packetsum & 0xffff) # aything past 16bits + the 16bits
 	checksum = (~sum16) & 0xffff # 16bit one's compliment of one's compliment
 
-	# stick checksum in tcp header and return
+	
 	return tcp_seg[:16] + struct.pack("H", checksum) + tcp_seg[18:]
 
 
@@ -136,7 +142,7 @@ if __name__ == "__main__":
 	count = 0
 
 	start = timer()
-	for port in ports:     # assign random high source port
+	for port in ports:
 		tcpsyn = tcp(src_ip, randint(20000, 65535), dst_ip, port)
 		with socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP) as s:
 			s.sendto(tcpsyn, (dst_ip, 0))
@@ -145,7 +151,6 @@ if __name__ == "__main__":
 			except socket.timeout:
 				if args.verb:
 					print("\nNo response from {}:{}".format(dst_ip, port))
-
 			else:
 				tcp_resp = struct.unpack_from("!HHIIHHHH", data, 20)
 				flags = hex(tcp_resp[4] & 0b11111) # isolate the flags that matter
