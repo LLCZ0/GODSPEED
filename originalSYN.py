@@ -1,11 +1,12 @@
 #!/usr/bin/python3
-#
-# originalSYN.py by LLCZ00
-#
-# For all have sinned,
-# 	and fall short of the glory of God.
-# - Romans 3:23
-# 
+
+"""
+originalSYN.py by LLCZ00
+
+For all have sinned,
+	and fall short of the glory of God.
+- Romans 3:23
+"""
 _v='v1.2.1'
 
 import socket
@@ -121,7 +122,7 @@ def tcp(src_ip, src_port, dst_ip, dst_port): # generate tcp header
 		2,      # flag (SYN)
 		1024,   # window size
 		0,      # checksum placeholder
-		0       # urgent 
+		0       # urgent flag
 	)
 
 	ipheader = struct.pack(
@@ -132,11 +133,10 @@ def tcp(src_ip, src_port, dst_ip, dst_port): # generate tcp header
 		len(tcp_seg)
 	)
 
-	# calculate checksum
-	packetsum = sum(array("H", tcp_seg+ipheader)) # add all 16bit groups together
-	sum16 = (packetsum >> 16) + (packetsum & 0xffff) # aything past 16bits + the 16bits
-	checksum = (~sum16) & 0xffff # 16bit one's compliment of one's compliment
-
+	# calculate checksum (the 16 bit one's complement of the one's complement sum of all 16 bit words in the header)
+	packetsum = sum(array("H", tcp_seg+ipheader))
+	sum16 = (packetsum >> 16) + (packetsum & 0xffff) 
+	checksum = (~sum16) & 0xffff # 
 	
 	return tcp_seg[:16] + struct.pack("H", checksum) + tcp_seg[18:]
 
@@ -145,12 +145,14 @@ if __name__ == "__main__":
 	args = argument_handler()
 
 	socket.setdefaulttimeout(args.timeout)
+	
 	src_ip = get_hostIP()
 	dst_ip = args.target_ip
 	ports = args.ports
+	verbose = args.verb # default is false
 	count = 0
-
 	start = timer()
+	
 	for port in ports:
 		tcpsyn = tcp(src_ip, randint(20000, 65535), dst_ip, port)
 		with socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP) as s:
@@ -158,7 +160,7 @@ if __name__ == "__main__":
 			try:
 				data = s.recv(64)
 			except socket.timeout:
-				if args.verb:
+				if verbose:
 					print("\nNo response from {}:{}".format(dst_ip, port))
 			else:
 				tcp_resp = struct.unpack_from("!HHIIHHHH", data, 20)
@@ -168,7 +170,7 @@ if __name__ == "__main__":
 					print("Port {} is open".format(tcp_resp[0]))
 					count += 1
 
-				elif args.verb:
+				elif verbose:
 					if flags == '0x14': # rst, ack
 						print("Port {} is closed".format(tcp_resp[0]))
 
@@ -177,5 +179,5 @@ if __name__ == "__main__":
 
 	end = timer()
 
-	print("{} port(s) scanned, {} found open.".format(len(args.ports), count))
+	print("{} port(s) scanned, {} found open.".format(len(ports), count))
 	print("Completed in {}s".format(end - start))
