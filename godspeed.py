@@ -1,14 +1,15 @@
 #!/usr/bin/python3
-#
-# godspeed.py by LLCZ00
-# v1.1.1
-#
-# Look! He advances like the clouds,
-# 	 his chariots come like a whirlwind,
-# his horses are swifter than eagles.
-#    Woe to us! We are ruined!
-# - Jeremiah 4:13
-#
+
+"""
+godspeed.py by LLCZ00
+
+Look! He advances like the clouds,
+   his chariots come like a whirlwind,
+his horses are swifter than eagles.
+   Woe to us! We are ruined!
+- Jeremiah 4:13
+"""
+_v='v1.1.2'
 
 import socket
 import sys
@@ -19,39 +20,45 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 lock = threading.Lock()
 
+
 class LLCZ00Parser(argparse.ArgumentParser): # better error handler
     def error(self, message):
         print("Error. {}".format(message))
         sys.exit("Try '{} --help' for more information".format(self.prog))
 
 def argument_handler():
-	parser = LLCZ00Parser(prog='godspeed.py',
+	parser = LLCZ00Parser(
+		prog='godspeed.py',
 		usage="%(prog)s [options] target_ip", 
 		formatter_class=argparse.RawDescriptionHelpFormatter,
-		description="GODSPEED Scanner v1.1.1:\nPerforms a relatively quick TCP Connect scan of all 65,535 ports.\nOutputs nmap-friendly command for further enumeration.",
+		description="GODSPEED Scanner {}:\nPerforms a relatively quick TCP Connect scan of all 65,535 ports.\nOutputs nmap-friendly command for further enumeration.".format(_v),
 		epilog="Examples:\n%(prog)s 192.168.1.1\n%(prog)s --threads=400 -q 10.10.10.23\n%(prog)s -w 150 --timeout 1.2 192.168.1.50"
-		)
-	parser.add_argument('-q', '--quiet',
+	)
+	parser.add_argument(
+		'-q', '--quiet',
 		help="Output nothing but the nmap command",
 		dest='quiet',
 		action='store_true'
-		)	
-	parser.add_argument('-w', '--threads',
+	)	
+	parser.add_argument(
+		'-w', '--threads',
 		help="Amount of working threads to run. (Default=%(default)s)",
 		default=100,
 		dest='threads',
 		type=int
-		)
-	parser.add_argument('-t','--timeout',
+	)
+	parser.add_argument(
+		'-t','--timeout',
 		help="Connection timeout, in seconds. (Default=%(default)s)",
 		default=0.3,
 		dest='timeout',
 		type=float,
 		metavar='TIMEOUT'	
-		)	
-	parser.add_argument('target_ip',
+	)	
+	parser.add_argument(
+		'target_ip',
 		help="IP address to scan"
-		)	
+	)	
 
 
 	cmd = parser.parse_args()
@@ -96,13 +103,13 @@ if __name__ == '__main__':
 		for _ in as_completed(connections): # run
 			pass
 
-	if not args.quiet:
+	if not quiet:
 		print("\nScan completed at {:.5f}s".format(time.perf_counter() - t))
 		print("{} open TCP port(s) found.\n".format(len(open_ports)))
 
 	if open_ports != []:
 		print("suggested nmap command:")		
 		print("nmap -p {} -sV -Pn -sC -T4 {}".format(','.join(open_ports), dst_ip))
-	elif args.quiet:
+	elif quiet:
 		print("Quiet Mode: No open ports found.")
 		

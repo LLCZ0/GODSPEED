@@ -1,12 +1,13 @@
 #!/usr/bin/python3
-#
-# originalSYN.py by LLCZ00
-# v1.2.0
-#
-# For all have sinned,
-# 	and fall short of the glory of God.
-# - Romans 3:23
-# 
+
+"""
+originalSYN.py by LLCZ00
+
+For all have sinned,
+	and fall short of the glory of God.
+- Romans 3:23
+"""
+_v='v1.2.1'
 
 import socket
 import struct
@@ -15,6 +16,7 @@ import argparse
 from time import perf_counter as timer
 from random import randint
 from array import array
+
 
 class LLCZ00Parser(argparse.ArgumentParser): # better error handler
     def error(self, message):
@@ -45,13 +47,13 @@ class Validator(argparse.Action): # custom action to sort/validate target ip and
 				if '-' in port_item: # handle ranges			
 					port_range = list(map(int, port_item.split('-')))
 
-					if (1 <= port_range[0] < port_range[1] <= 65535):
+					if 1 <= port_range[0] < port_range[1] <= 65535:
 						ports_tmp += [x for x in range(port_range[0], port_range[1]+1)]
 					else:
 						parser.error("ports out of range(1-65535), or out of order: {}".format(port_item))
 
 				else: # handle singles
-					if (1 <= int(port_item) <= 65535): 
+					if 1 <= int(port_item) <= 65535: 
 						ports_tmp += [int(port_item)]
 					else:
 						parser.error("port number out of range(1-65535): {}".format(port_item))
@@ -63,34 +65,39 @@ class Validator(argparse.Action): # custom action to sort/validate target ip and
 
 
 def argument_handler():
-	parser = LLCZ00Parser(prog='originalSYN.py',
+	parser = LLCZ00Parser(
+		prog='originalSYN.py',
 		usage="%(prog)s [options] target_ip ports", 
 		formatter_class=argparse.RawDescriptionHelpFormatter,
-		description="OriginalSYN Scanner v1.2:\nPerforms a TCP SYN scan of desired ports.\nRequires sudo/root privileges to use raw sockets",
+		description="OriginalSYN Scanner {}:\nPerforms a TCP SYN scan of desired ports.\nRequires sudo/root privileges to use raw sockets".format(_v),
 		epilog="Examples:\n%(prog)s 192.168.1.1 8080\n%(prog)s -v -t 15 10.10.10.23 9090 9091 9092-10000\n%(prog)s --timeout=.1 192.168.1.50 1-65535"
-		)
+	)
 
-	parser.add_argument('-v', '--verbose',
+	parser.add_argument(
+		'-v', '--verbose',
 		help="Output closed/irregular responses, and non-responsive ports",
 		action='store_true',
 		dest='verb'
-		)
-	parser.add_argument('-t','--timeout',
+	)
+	parser.add_argument(
+		'-t','--timeout',
 		help="Connection timeout, in seconds. (Default=%(default)s)",
 		default=0.5,
 		dest='timeout',
 		type=float,
 		metavar='TIMEOUT'	
-		)
-	parser.add_argument('target_ip',
+	)
+	parser.add_argument(
+		'target_ip',
 		help="IP address to scan",
 		action=Validator
-		)	
-	parser.add_argument('ports',
+	)	
+	parser.add_argument(
+		'ports',
 		help="Port, ports, or port range to scan",
 		nargs='+',
 		action=Validator
-		)
+	)
 
 	return parser.parse_args()
 
@@ -105,7 +112,8 @@ def get_hostIP():
 	# If it continuously fails for some reason, hardcode your ip in
 
 def tcp(src_ip, src_port, dst_ip, dst_port): # generate tcp header
-	tcp_seg = struct.pack('!HHIIBBHHH', 
+	tcp_seg = struct.pack(
+		'!HHIIBBHHH', 
 		src_port, 
 		dst_port, 
 		0,      # sequence
@@ -114,20 +122,21 @@ def tcp(src_ip, src_port, dst_ip, dst_port): # generate tcp header
 		2,      # flag (SYN)
 		1024,   # window size
 		0,      # checksum placeholder
-		0       # urgent 
-		)
+		0       # urgent flag
+	)
 
-	ipheader = struct.pack('!4s4sHH',
+	ipheader = struct.pack(
+		'!4s4sHH',
 		socket.inet_aton(src_ip), 
 		socket.inet_aton(dst_ip), 
 		socket.IPPROTO_TCP, 
-		len(tcp_seg))
+		len(tcp_seg)
+	)
 
-	# calculate checksum
-	packetsum = sum(array("H", tcp_seg+ipheader)) # add all 16bit groups together
-	sum16 = (packetsum >> 16) + (packetsum & 0xffff) # aything past 16bits + the 16bits
-	checksum = (~sum16) & 0xffff # 16bit one's compliment of one's compliment
-
+	# calculate checksum (the 16 bit one's complement of the one's complement sum of all 16 bit words in the header)
+	packetsum = sum(array("H", tcp_seg+ipheader))
+	sum16 = (packetsum >> 16) + (packetsum & 0xffff) 
+	checksum = (~sum16) & 0xffff # 
 	
 	return tcp_seg[:16] + struct.pack("H", checksum) + tcp_seg[18:]
 
@@ -136,12 +145,14 @@ if __name__ == "__main__":
 	args = argument_handler()
 
 	socket.setdefaulttimeout(args.timeout)
+	
 	src_ip = get_hostIP()
 	dst_ip = args.target_ip
 	ports = args.ports
+	verbose = args.verb # default is false
 	count = 0
-
 	start = timer()
+	
 	for port in ports:
 		tcpsyn = tcp(src_ip, randint(20000, 65535), dst_ip, port)
 		with socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_TCP) as s:
@@ -149,7 +160,7 @@ if __name__ == "__main__":
 			try:
 				data = s.recv(64)
 			except socket.timeout:
-				if args.verb:
+				if verbose:
 					print("\nNo response from {}:{}".format(dst_ip, port))
 			else:
 				tcp_resp = struct.unpack_from("!HHIIHHHH", data, 20)
@@ -159,7 +170,7 @@ if __name__ == "__main__":
 					print("Port {} is open".format(tcp_resp[0]))
 					count += 1
 
-				elif args.verb:
+				elif verbose:
 					if flags == '0x14': # rst, ack
 						print("Port {} is closed".format(tcp_resp[0]))
 
@@ -168,5 +179,5 @@ if __name__ == "__main__":
 
 	end = timer()
 
-	print("{} port(s) scanned, {} found open.".format(len(args.ports), count))
+	print("{} port(s) scanned, {} found open.".format(len(ports), count))
 	print("Completed in {}s".format(end - start))
