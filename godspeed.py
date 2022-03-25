@@ -99,19 +99,17 @@ if __name__ == '__main__':
 	t = time.perf_counter()
 	# Threading. May revisit, could be better
 	with ThreadPoolExecutor(max_workers=threads) as ex: 
-		connections = [
-			ex.submit(connect, dst_ip, port, quiet) for port in range(1,65536)
-		] # compile list of futures
+		connections = [ex.submit(connect, dst_ip, port, quiet) for port in range(1,65536)] # compile list of futures
 		for _ in as_completed(connections): # run
 			pass
 
-	if not args.quiet:
+	if not quiet:
 		print("\nScan completed at {:.5f}s".format(time.perf_counter() - t))
 		print("{} open TCP port(s) found.\n".format(len(open_ports)))
 
 	if open_ports != []:
 		print("suggested nmap command:")		
 		print("nmap -p {} -sV -Pn -sC -T4 {}".format(','.join(open_ports), dst_ip))
-	elif args.quiet:
+	elif quiet:
 		print("Quiet Mode: No open ports found.")
 		
