@@ -1,13 +1,14 @@
 #!/usr/bin/python3
-#
-# godspeed.py by LLCZ00
-#
-# Look! He advances like the clouds,
-#    his chariots come like a whirlwind,
-# his horses are swifter than eagles.
-#    Woe to us! We are ruined!
-# - Jeremiah 4:13
-#
+
+"""
+godspeed.py by LLCZ00
+
+Look! He advances like the clouds,
+   his chariots come like a whirlwind,
+his horses are swifter than eagles.
+   Woe to us! We are ruined!
+- Jeremiah 4:13
+"""
 _v='v1.1.2'
 
 import socket
