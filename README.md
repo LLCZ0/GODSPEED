@@ -105,4 +105,4 @@ Completed in 0.002007741015404463s
 - Add more religious iconography
 ## Disclaimer
 *(In case any one actually finds their way here)*<br/>
-While port scanning hosts/servers without permission isn't technically a crime in the US, the owners of said hosts/servers absolutely do not like it. Ramifications of an unauthorized scan may include (but are not limited to) IP banishment, lawsuits, and/or violating your ISP's Acceptable Use Policy and losing your internet.
+While port scanning hosts/servers without permission isn't technically a crime in the US, the owners of said hosts/servers absolutely do not like it. Ramifications of an unauthorized scan may include (but are not limited to) IP banishment, lawsuits, and/or losing your internet by violating your ISP's Acceptable Use Policy.
