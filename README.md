@@ -99,10 +99,10 @@ Completed in 0.002007741015404463s
 - 2/3rds of the filesize is overly comprehensive argument parsing and error handling code
 - Requires sudo/root privileges, due to raw socket usage
 - Currently only works on linux, because windows does not allow you to use raw sockets for TCP. 
-## Disclaimer
-*(In case any one actually finds their way here)*<br/>
-While port scanning hosts/servers without permission isn't technically a crime in the US, the owners of said hosts/servers absolutely do not like it. Ramifications of an unauthorized scan may include (but are not limited to) IP banishment, lawsuits, and/or violating your ISP's Acceptable Use Policy and losing your internet. If you're still hell-bent on doing whatever you want to do, don't use my scanners lol.
 ## To do
 - Add UDP functionality (ogSYN, probably)
 - Make threading code less hideous/more efficient (godspeed)
 - Add more religious iconography
+## Disclaimer
+*(In case any one actually finds their way here)*<br/>
+While port scanning hosts/servers without permission isn't technically a crime in the US, the owners of said hosts/servers absolutely do not like it. Ramifications of an unauthorized scan may include (but are not limited to) IP banishment, lawsuits, and/or violating your ISP's Acceptable Use Policy and losing your internet.
